@@ -1,5 +1,5 @@
-import ImmersivePlanner from "@/components/ImmersivePlanner";
+import PlannerShell from "@/components/PlannerShell";
 
 export default function Home() {
-  return <ImmersivePlanner />;
+  return <PlannerShell />;
 }
