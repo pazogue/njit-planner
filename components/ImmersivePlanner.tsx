@@ -64,6 +64,20 @@ function reason(i: PlannerItem) {
   return "Start early so it never becomes a last-minute problem.";
 }
 
+function risk(i: PlannerItem) {
+  if (!i.dueAt) return "Plan it";
+  const h=(new Date(i.dueAt).getTime()-Date.now())/3600000;
+  if(h<=0) return "Overdue";
+  if(h<=12) return "Critical";
+  if(h<=30) return "High";
+  if(h<=60) return "Watch";
+  return "Early";
+}
+
+function clock(d: Date) {
+  return d.toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"});
+}
+
 function Dot({ courseId }: { courseId: PlannerItem["courseId"] }) {
   return <span className="im-dot" style={{ background: COURSES[courseId].color }} />;
 }
@@ -110,8 +124,12 @@ export default function ImmersivePlanner() {
     let raf=0;
     const update=()=>{
       raf=0; const root=document.documentElement; const max=Math.max(1,root.scrollHeight-innerHeight); const p=Math.min(1,scrollY/max);
-      root.style.setProperty("--im-scroll",String(p)); root.style.setProperty("--im-parallax",`${Math.min(scrollY*.055,110)}px`);
-      const story=storyRef.current; if(story){const r=story.getBoundingClientRect();const travel=Math.max(1,story.offsetHeight-innerHeight);const sp=Math.min(.999,Math.max(0,-r.top/travel));setStoryStep(Math.min(3,Math.floor(sp*4)));}
+      root.style.setProperty("--im-scroll",String(p));
+      root.style.setProperty("--im-parallax",`${Math.min(scrollY*.055,130)}px`);
+      root.style.setProperty("--im-hero-shift",`${Math.min(34,scrollY*.055)}px`);
+      root.style.setProperty("--im-hero-blur",`${Math.min(8,scrollY*.012)}px`);
+      root.style.setProperty("--im-hero-fade",String(Math.min(.52,scrollY/900)));
+      const story=storyRef.current; if(story){const r=story.getBoundingClientRect();const travel=Math.max(1,story.offsetHeight-innerHeight);const sp=Math.min(.999,Math.max(0,-r.top/travel));root.style.setProperty("--im-story",String(sp));root.style.setProperty("--im-sheen",`${(sp-.5)*30}%`);setStoryStep(Math.min(3,Math.floor(sp*4)));}
     };
     const onScroll=()=>{if(!raf)raf=requestAnimationFrame(update)};update();addEventListener("scroll",onScroll,{passive:true});addEventListener("resize",onScroll);return()=>{removeEventListener("scroll",onScroll);removeEventListener("resize",onScroll);if(raf)cancelAnimationFrame(raf)};
   },[view]);
@@ -128,6 +146,14 @@ export default function ImmersivePlanner() {
   const weekOpen = weekItems.filter(i=>!isDone(i)).length; const weekDone = weekItems.filter(isDone).length;
   const pressure = weekOpen>=8?"Heavy":weekOpen>=4?"Moderate":"Light";
   const priority = urgent[0];
+  const tonightPlan = useMemo(()=>{
+    const start=new Date(); start.setSeconds(0,0); start.setMinutes(Math.ceil(start.getMinutes()/15)*15);
+    let cursor=new Date(start);
+    return urgent.slice(0,3).map((item,index)=>{
+      const mins=estimate(item); const from=new Date(cursor); const to=new Date(cursor.getTime()+mins*60000); cursor=new Date(to.getTime()+10*60000);
+      return {item,index,mins,from,to};
+    });
+  },[urgent]);
   const filtered = active.filter(i=>(filter==="all"||String(i.courseId)===filter)&&(!query||`${i.title} ${i.course}`.toLowerCase().includes(query.toLowerCase()))).sort((a,b)=>!a.dueAt?1:!b.dueAt?-1:+new Date(a.dueAt)-+new Date(b.dueAt));
 
   const toggleTask=(id:string)=>setTasks(ts=>ts.map(t=>t.id===id?{...t,status:t.status==="complete"?"unsubmitted":"complete"}:t));
@@ -135,7 +161,7 @@ export default function ImmersivePlanner() {
 
   return <div className="im-app">
     <div className="im-progress"/>
-    <div className="im-bg"><div className="im-photo"/><div className="im-vignette"/><div className="im-mist m1"/><div className="im-mist m2"/></div>
+    <div className="im-bg"><div className="im-photo"/><div className="im-stars"/><div className="im-depth far"/><div className="im-depth mid"/><div className="im-depth near"/><div className="im-valley"/><div className="im-vignette"/><div className="im-mist m1"/><div className="im-mist m2"/></div>
     <aside className="im-sidebar"><div className="im-brand"><span>S</span><div><b>Semester</b><small>Fall 2026</small></div></div><nav>{nav.map(([id,label,Icon])=><button key={id} className={view===id?"active":""} onClick={()=>setView(id)}><Icon/><span>{label}</span></button>)}</nav><div className="im-connection"><i className={payload?.connected?"live":""}/><div><b>{payload?.connected?"Canvas live":"Preview mode"}</b><small>{payload?`Synced ${timeFmt.format(new Date(payload.fetchedAt))}`:"Connecting…"}</small></div></div></aside>
     <main className="im-main"><header className="im-top"><div className="im-mobile-brand">Semester</div><div><button className="im-ghost" onClick={()=>sync(true)}><RefreshIcon className={syncing?"spin":""}/>{syncing?"Syncing":"Sync now"}</button><button className="im-primary" onClick={()=>setShowTask(true)}><PlusIcon/>Add task</button></div></header>
       <div className="im-content">
@@ -147,7 +173,9 @@ export default function ImmersivePlanner() {
 
           <section className="im-triage"><article className="im-glass"><div className="im-triage-head"><span>At Risk</span><b>{atRisk.length}</b></div><p>Needs attention before it turns into a fire drill.</p>{atRisk.map(i=><button key={i.id} onClick={()=>setView("assignments")}><span><Dot courseId={i.courseId}/>{i.course}</span><b>{i.title}</b><em>{dueLabel(i.dueAt)}</em></button>)}</article><article className="im-glass"><div className="im-triage-head"><span>Quick Wins</span><b>{quickWins.length}</b></div><p>Small things you can knock out fast.</p>{quickWins.map(i=><button key={i.id} onClick={()=>setView("assignments")}><span><Dot courseId={i.courseId}/>{i.course}</span><b>{i.title}</b><em>~{estimate(i)} min</em></button>)}</article><article className="im-glass im-pressure"><div className="im-triage-head"><span>Week Pressure</span><b>{pressure}</b></div><p>{weekOpen} unfinished item{weekOpen===1?"":"s"} this week.</p><div className="im-bars">{days.map(d=>{const c=weekItems.filter(i=>i.dueAt&&key(new Date(i.dueAt))===key(d)&&!isDone(i)).length;return <div key={key(d)}><i style={{height:`${Math.max(8,Math.min(100,c*25))}%`}}/><span>{d.toLocaleDateString("en-US",{weekday:"short"}).slice(0,1)}</span></div>})}</div></article></section>
 
-          <section className="im-story" ref={storyRef}><div className="im-story-copy">{[["01 · Focus","One thing at a time.","Your most important task moves forward while everything else recedes."],["02 · Upcoming","See the pressure before you feel it.","Deadlines fan out in depth instead of hiding in a flat list."],["03 · Your week","Workload becomes visual.","A quick glance shows which days are filling up."],["04 · All sources","One semester, one timeline.","Canvas, syllabi, Capstone dates, and personal tasks converge."]].map((s,n)=><article className={storyStep===n?"active":""} key={s[0]}><p>{s[0]}</p><h2>{s[1]}</h2><span>{s[2]}</span></article>)}</div><div className="im-stage-wrap"><div className="im-stage"><div className="im-stage-landscape"/>{[0,1,2,3].map(n=><div key={n} className={`im-scene s${n} ${storyStep===n?"active":""}`}>{n===0&&<><small>Suggested focus</small><h3>{priority?.title||"You're caught up."}</h3><p>{priority?dueLabel(priority.dueAt):"No urgent deadlines"}</p></>}{n===1&&<div className="im-stack">{open.slice(0,4).map((i,x)=><article key={i.id} style={{"--x":x,"--course":COURSES[i.courseId].color} as React.CSSProperties}><span>{i.course}</span><b>{i.title}</b><small>{dueLabel(i.dueAt)}</small></article>)}</div>}{n===2&&<div className="im-weekviz">{days.map(d=>{const l=weekItems.filter(i=>i.dueAt&&key(new Date(i.dueAt))===key(d));return <div key={key(d)}><span>{d.toLocaleDateString("en-US",{weekday:"short"}).slice(0,1)}</span><div>{l.slice(0,4).map(i=><i key={i.id} style={{background:COURSES[i.courseId].color}}/>)}</div><small>{l.length}</small></div>})}</div>}{n===3&&<div className="im-syncviz"><div className="core">S</div><span className="a">Canvas</span><span className="b">Syllabus</span><span className="c">Capstone</span><span className="d">Personal</span><i/><i/></div>}</div>)}</div></div></section>
+          <section className="im-tonight im-glass"><div className="im-tonight-copy"><p>Smart sequence</p><h2>Tonight, in the right order.</h2><span>The planner builds a short focus sequence from urgency, point value, and estimated effort — with a 10-minute reset between blocks.</span><button className="im-ghost" onClick={()=>setView("assignments")}>Open all assignments <ArrowIcon/></button></div><div className="im-plan-rail">{tonightPlan.length?tonightPlan.map(({item,index,mins,from,to})=><article key={item.id} className="im-plan-block" style={{"--plan":index} as React.CSSProperties}><div className="im-plan-time"><b>{clock(from)}</b><span>{clock(to)}</span></div><div className="im-plan-track"><i/></div><div className="im-plan-card"><div><Dot courseId={item.courseId}/><span>{item.course}</span><em>{risk(item)}</em></div><h3>{item.title}</h3><p>{mins} min focus block · {reason(item)}</p></div></article>):<div className="im-plan-empty">Nothing urgent enough to schedule tonight. Get ahead on the next assignment instead.</div>}</div></section>
+
+          <section className="im-story" ref={storyRef}><div className="im-story-copy">{[["01 · Focus","One thing at a time.","Your most important task moves forward while everything else recedes."],["02 · Upcoming","See the pressure before you feel it.","Deadlines fan out in depth instead of hiding in a flat list."],["03 · Your week","Workload becomes visual.","A quick glance shows which days are filling up."],["04 · All sources","One semester, one timeline.","Canvas, syllabi, Capstone dates, and personal tasks converge."]].map((s,n)=><article className={storyStep===n?"active":""} key={s[0]}><p>{s[0]}</p><h2>{s[1]}</h2><span>{s[2]}</span></article>)}</div><div className="im-stage-wrap"><div className="im-stage" onPointerMove={e=>{const r=e.currentTarget.getBoundingClientRect();e.currentTarget.style.setProperty("--im-tilt-y",`${((e.clientX-r.left)/r.width-.5)*8}deg`);e.currentTarget.style.setProperty("--im-tilt-x",`${((e.clientY-r.top)/r.height-.5)*-6}deg`)}} onPointerLeave={e=>{e.currentTarget.style.setProperty("--im-tilt-y","0deg");e.currentTarget.style.setProperty("--im-tilt-x","0deg")}}><div className="im-stage-landscape"/>{[0,1,2,3].map(n=><div key={n} className={`im-scene s${n} ${storyStep===n?"active":""}`}>{n===0&&<><small>Suggested focus</small><h3>{priority?.title||"You're caught up."}</h3><p>{priority?dueLabel(priority.dueAt):"No urgent deadlines"}</p></>}{n===1&&<div className="im-stack">{open.slice(0,4).map((i,x)=><article key={i.id} style={{"--x":x,"--course":COURSES[i.courseId].color} as React.CSSProperties}><span>{i.course}</span><b>{i.title}</b><small>{dueLabel(i.dueAt)}</small></article>)}</div>}{n===2&&<div className="im-weekviz">{days.map(d=>{const l=weekItems.filter(i=>i.dueAt&&key(new Date(i.dueAt))===key(d));return <div key={key(d)}><span>{d.toLocaleDateString("en-US",{weekday:"short"}).slice(0,1)}</span><div>{l.slice(0,4).map(i=><i key={i.id} style={{background:COURSES[i.courseId].color}}/>)}</div><small>{l.length}</small></div>})}</div>}{n===3&&<div className="im-syncviz"><div className="core">S</div><span className="a">Canvas</span><span className="b">Syllabus</span><span className="c">Capstone</span><span className="d">Personal</span><i/><i/></div>}</div>)}</div></div></section>
 
           <section className="im-best im-glass"><div className="im-best-icon">✦</div><div><p>Best next move</p><h2>{priority?`Start ${priority.course} before it becomes urgent.`:"Protect your momentum."}</h2><span>{priority?`${priority.title} is the strongest next move right now. ${reason(priority)}`:"You have breathing room. Use it to get ahead on the next assignment."}</span></div><button className="im-primary" onClick={()=>setView("assignments")}>See plan <ArrowIcon/></button></section>
 
