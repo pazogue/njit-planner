@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import "./immersive.css";
+import "./immersive-v2.css";
 
 export const metadata: Metadata = {
   title: "Semester — NJIT Planner",
