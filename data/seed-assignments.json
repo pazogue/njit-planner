@@ -1,0 +1,11 @@
+[
+  {"courseId":72097,"assignmentId":1,"name":"Module 1.2 Formal Discussion — Ethical Approaches to Engineering","dueAt":"2026-09-11T23:59:00-04:00","pointsPossible":10,"gradingType":"points","htmlUrl":null,"status":"unsubmitted"},
+  {"courseId":72097,"assignmentId":2,"name":"Academic Engagement","dueAt":"2026-09-11T23:59:00-04:00","pointsPossible":null,"gradingType":"points","htmlUrl":null,"status":"submitted"},
+  {"courseId":71068,"assignmentId":3,"name":"Post Case Citation Here","dueAt":"2026-09-11T23:59:00-04:00","pointsPossible":null,"gradingType":"points","htmlUrl":null,"status":"unsubmitted"},
+  {"courseId":71068,"assignmentId":4,"name":"First Discussion Board — to Hack or not to Hack","dueAt":"2026-09-11T23:59:00-04:00","pointsPossible":null,"gradingType":"points","htmlUrl":null,"status":"unsubmitted"},
+  {"courseId":70275,"assignmentId":5,"name":"In-Class Activity — Migration Through Different Lenses","dueAt":"2026-09-10T23:59:00-04:00","pointsPossible":null,"gradingType":"points","htmlUrl":null,"status":"unsubmitted"},
+  {"courseId":73232,"assignmentId":6,"name":"Academic Engagement Fall 2026","dueAt":"2026-09-11T23:59:00-04:00","pointsPossible":null,"gradingType":"points","htmlUrl":null,"status":"submitted"},
+  {"courseId":71836,"assignmentId":7,"name":"Academic Engagement Fall 2026","dueAt":"2026-09-11T23:59:00-04:00","pointsPossible":null,"gradingType":"points","htmlUrl":null,"status":"submitted"},
+  {"courseId":71068,"assignmentId":8,"name":"IT 400 Quiz #3","dueAt":"2025-11-16T23:59:00-05:00","pointsPossible":20,"gradingType":"points","htmlUrl":null,"status":"unsubmitted"},
+  {"courseId":71068,"assignmentId":9,"name":"IT 400 Final Exam","dueAt":"2025-12-20T23:59:00-05:00","pointsPossible":25,"gradingType":"points","htmlUrl":null,"status":"unsubmitted"}
+]
