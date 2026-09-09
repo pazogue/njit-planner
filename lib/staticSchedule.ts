@@ -1,0 +1,48 @@
+import type { PlannerItem } from "./types";
+
+const e = (id:string,courseId:PlannerItem["courseId"],course:string,title:string,dueAt:string,source:PlannerItem["source"],detail?:string):PlannerItem => ({id,courseId,course,title,dueAt,status:"unsubmitted",source,kind:"event",detail});
+
+export const STATIC_SCHEDULE: PlannerItem[] = [
+  e("it491-sep10",73232,"IT 491","Virtual Orientation + early interviews","2026-09-10T18:00:00-04:00","live-schedule","Thursday live section · Zoom · 6:00–8:50 PM"),
+  e("it491-sep13",73232,"IT 491","Replacement orientation + early interviews","2026-09-13T18:00:00-04:00","live-schedule","Tuesday section · Zoom · 6:00–8:50 PM"),
+  e("it491-sep14",73232,"IT 491","Final track application deadline","2026-09-14T23:59:00-04:00","live-schedule","Online application deadline"),
+  e("it491-sep15",73232,"IT 491","Deliverables Training Workshop — Tuesday","2026-09-15T18:00:00-04:00","live-schedule","Campus · 7% graded milestone"),
+  e("it491-sep17",73232,"IT 491","Deliverables Training Workshop — Thursday","2026-09-17T18:00:00-04:00","live-schedule","Campus · 7% graded milestone"),
+  e("it491-sep18",73232,"IT 491","Virtual Industry Open House","2026-09-18T11:00:00-04:00","live-schedule","Zoom · 11:00 AM–2:00 PM"),
+  e("it491-sep19",73232,"IT 491","RWC Coaches Open House","2026-09-19T14:00:00-04:00","live-schedule","Zoom · 2:00–4:00 PM"),
+  e("it491-sep20-startup",73232,"IT 491","Startup Open House","2026-09-20T14:00:00-04:00","live-schedule","Zoom · 2:00–4:00 PM"),
+  e("it491-sep20-cisco",73232,"IT 491","Cisco / Network Engineering Organization","2026-09-20T17:00:00-04:00","live-schedule","Required for Cisco applicants / approved candidates · Zoom · 5:00–7:00 PM"),
+  e("it491-sep26",73232,"IT 491","Industry Projects Open House","2026-09-26T12:00:00-04:00","live-schedule","Campus · CTR Ballroom · 12:00–5:00 PM"),
+  e("it491-sep28",73232,"IT 491","Placement / team commitment target","2026-09-28T23:59:00-04:00","live-schedule","Canvas / Discord"),
+  e("it491-oct08",73232,"IT 491","PM Report 1 + Project Readiness Package","2026-10-08T23:59:00-04:00","live-schedule","Readiness package is an 8% universal milestone"),
+  e("it491-oct22",73232,"IT 491","PM Report 2","2026-10-22T23:59:00-04:00","live-schedule"),
+  e("it491-nov05",73232,"IT 491","PM Report 3","2026-11-05T23:59:00-05:00","live-schedule"),
+  e("it491-nov08",73232,"IT 491","Midterm Review","2026-11-08T23:59:00-05:00","live-schedule","Process-focused presentation + demo evidence"),
+  e("it491-nov19",73232,"IT 491","PM Report 4","2026-11-19T23:59:00-05:00","live-schedule"),
+  e("it491-dec05",73232,"IT 491","Final Showcase","2026-12-05T11:00:00-05:00","live-schedule","All teams · 11:00 AM–7:00 PM"),
+  e("it491-dec13",73232,"IT 491","Final package","2026-12-13T23:59:00-05:00","live-schedule","Final paper + sponsor evaluation + PM Report 5"),
+
+  e("it400-sep11-disc1",71068,"IT 400","Discussion Board 1 — answer","2026-09-11T23:59:00-04:00","syllabus"),
+  e("it400-sep13-disc1",71068,"IT 400","Discussion Board 1 — replies","2026-09-13T23:59:00-04:00","syllabus"),
+  e("it400-sep13-syllabus",71068,"IT 400","Syllabus questions","2026-09-13T23:59:00-04:00","syllabus"),
+  e("it400-sep18",71068,"IT 400","Case Brief — Chapter 1","2026-09-18T23:59:00-04:00","syllabus"),
+  e("it400-sep20",71068,"IT 400","Case Brief Chapter 1 — reply","2026-09-20T23:59:00-04:00","syllabus"),
+  e("it400-sep25",71068,"IT 400","Discussion Board 2 — answer","2026-09-25T23:59:00-04:00","syllabus"),
+  e("it400-sep27",71068,"IT 400","Discussion Board 2 — replies","2026-09-27T23:59:00-04:00","syllabus"),
+  e("it400-oct04",71068,"IT 400","Quiz 1 — Chapters 1–3","2026-10-04T23:59:00-04:00","syllabus","Available Sep 30 at 8:00 AM"),
+  e("it400-oct09",71068,"IT 400","Case Brief — Chapter 4","2026-10-09T23:59:00-04:00","syllabus"),
+  e("it400-oct11",71068,"IT 400","Case Brief Chapter 4 — reply","2026-10-11T23:59:00-04:00","syllabus"),
+  e("it400-oct16",71068,"IT 400","Case Brief — Chapter 5","2026-10-16T23:59:00-04:00","syllabus"),
+  e("it400-oct18",71068,"IT 400","Case Brief Chapter 5 — reply","2026-10-18T23:59:00-04:00","syllabus"),
+  e("it400-oct25",71068,"IT 400","Quiz 2","2026-10-25T23:59:00-04:00","syllabus","Available Oct 21 at 8:00 AM"),
+  e("it400-nov01",71068,"IT 400","Midterm","2026-11-01T23:59:00-05:00","syllabus","Available Oct 28 at 8:00 AM"),
+  e("it400-nov06",71068,"IT 400","Discussion Board 3 — answer","2026-11-06T23:59:00-05:00","syllabus"),
+  e("it400-nov08",71068,"IT 400","Discussion Board 3 — replies","2026-11-08T23:59:00-05:00","syllabus"),
+  e("it400-nov13",71068,"IT 400","Case Brief — Chapter 8","2026-11-13T23:59:00-05:00","syllabus"),
+  e("it400-nov15",71068,"IT 400","Case Brief Chapter 8 — reply","2026-11-15T23:59:00-05:00","syllabus"),
+  e("it400-nov22",71068,"IT 400","Quiz 3","2026-11-22T23:59:00-05:00","syllabus","Canvas currently contains an outdated 2025 due date; this Fall 2026 syllabus date is used."),
+  e("it400-dec04",71068,"IT 400","Discussion Board 4 — answer","2026-12-04T23:59:00-05:00","syllabus"),
+  e("it400-dec06",71068,"IT 400","Discussion Board 4 — replies","2026-12-06T23:59:00-05:00","syllabus"),
+  e("it400-dec13",71068,"IT 400","Quiz 4","2026-12-13T23:59:00-05:00","syllabus","Available Dec 9"),
+  e("it400-dec22",71068,"IT 400","Final Exam","2026-12-22T23:59:00-05:00","syllabus","Canvas currently contains an outdated 2025 due date; this Fall 2026 syllabus date is used.")
+];
