@@ -23,6 +23,16 @@ function mergeTasks(local: StoredTask[], remote: StoredTask[]) {
   return [...map.values()];
 }
 
+async function saveTask(task: StoredTask) {
+  const res = await fetch("/api/planner/tasks", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(task),
+  });
+  if (!res.ok) throw new Error("save failed");
+  return res.json();
+}
+
 export default function PlannerShell() {
   const [ready, setReady] = useState(false);
   const [cloud, setCloud] = useState<"syncing"|"live"|"offline">("syncing");
@@ -37,7 +47,12 @@ export default function PlannerShell() {
         const res = await fetch("/api/planner/tasks", { cache: "no-store" });
         const data = await res.json();
         if (!res.ok || !data.connected) throw new Error(data.error || "Cloud sync unavailable");
-        const merged = mergeTasks(local, data.tasks || []);
+
+        if (local.length) await Promise.all(local.map(saveTask));
+
+        const refreshed = await fetch("/api/planner/tasks", { cache: "no-store" });
+        const refreshedData = await refreshed.json();
+        const merged = mergeTasks(local, refreshedData.tasks || data.tasks || []);
         writeLocal(merged);
         lastSnapshot.current = JSON.stringify(merged);
         if (!cancelled) setCloud("live");
@@ -64,11 +79,7 @@ export default function PlannerShell() {
       if (snapshot === lastSnapshot.current) return;
       busy = true;
       try {
-        await Promise.all(current.map(task => fetch("/api/planner/tasks", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(task),
-        }).then(r => { if (!r.ok) throw new Error("save failed"); })));
+        await Promise.all(current.map(saveTask));
         lastSnapshot.current = snapshot;
         setCloud("live");
       } catch {
@@ -80,23 +91,24 @@ export default function PlannerShell() {
 
     const pullRemote = async () => {
       if (busy) return;
+      const current = readLocal();
+      if (JSON.stringify(current) !== lastSnapshot.current) return;
       try {
         const res = await fetch("/api/planner/tasks", { cache: "no-store" });
         const data = await res.json();
         if (!res.ok || !data.connected) throw new Error();
-        const current = readLocal();
-        const merged = mergeTasks(current, data.tasks || []);
-        const mergedSnapshot = JSON.stringify(merged);
-        if (mergedSnapshot !== JSON.stringify(current)) writeLocal(merged);
-        lastSnapshot.current = mergedSnapshot;
+        const remote = data.tasks || [];
+        const remoteSnapshot = JSON.stringify(remote);
+        if (remoteSnapshot !== JSON.stringify(current)) writeLocal(remote);
+        lastSnapshot.current = remoteSnapshot;
         setCloud("live");
       } catch {
         setCloud("offline");
       }
     };
 
-    const pushTimer = window.setInterval(pushChanges, 1500);
-    const pullTimer = window.setInterval(pullRemote, 30000);
+    const pushTimer = window.setInterval(pushChanges, 1200);
+    const pullTimer = window.setInterval(pullRemote, 15000);
     return () => { window.clearInterval(pushTimer); window.clearInterval(pullTimer); };
   }, [ready]);
 
